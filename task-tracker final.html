@@ -1,0 +1,1002 @@
+<div id="root">
+<style>
+  #root {
+    --paper: #E9EEE8;
+    --sheet: #FCFDFB;
+    --ink: #1A2620;
+    --ink-soft: #5A6B60;
+    --rule: #C4D0C3;
+    --rule-soft: #DCE4DA;
+    --stamp: #A93226;
+    --progress: #26618A;
+    --done: #3C7548;
+    --font-data: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.45;
+    padding: 0;
+    margin: 0;
+    -webkit-text-size-adjust: 100%;
+  }
+  #root *, #root *::before, #root *::after { box-sizing: border-box; }
+
+  /* ---------- masthead ---------- */
+  #root .masthead {
+    background: var(--sheet);
+    border-bottom: 2px solid var(--ink);
+    padding: 18px 16px 14px;
+  }
+  #root .masthead-eyebrow {
+    font-family: var(--font-data);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 6px;
+  }
+  #root .masthead-title {
+    font-family: var(--font-data);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  #root .masthead-meta {
+    font-family: var(--font-data);
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin: 8px 0 0;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- controls ---------- */
+  #root .controls {
+    background: var(--sheet);
+    border-bottom: 1px solid var(--rule);
+    padding: 10px 16px 12px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  #root .filters { display: flex; gap: 6px; flex-wrap: wrap; }
+  #root .filter-btn {
+    font-family: var(--font-data);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    border: 1px solid var(--rule);
+    background: transparent;
+    color: var(--ink-soft);
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  #root .filter-btn[aria-pressed="true"] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--sheet);
+  }
+  #root .filter-count { opacity: 0.65; margin-left: 5px; }
+  #root .search-row { display: flex; gap: 8px; margin-top: 9px; }
+  #root .search-input {
+    flex: 1;
+    font-family: var(--font-data);
+    font-size: 13px;
+    padding: 8px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: var(--paper);
+    color: var(--ink);
+    min-width: 0;
+  }
+  #root .icon-btn {
+    font-family: var(--font-data);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 11px;
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--sheet);
+    border-radius: 2px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  #root .icon-btn.ghost { background: transparent; color: var(--ink); }
+
+  /* ---------- ledger ---------- */
+  #root .ledger { padding: 0 0 40px; }
+  #root .date-band {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 16px 16px 6px;
+    border-bottom: 1px solid var(--ink);
+    margin-bottom: 0;
+  }
+  #root .date-band h2 {
+    font-family: var(--font-data);
+    font-size: 14px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  #root .date-band span {
+    font-family: var(--font-data);
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+
+  #root .entry {
+    background: var(--sheet);
+    border-bottom: 1px solid var(--rule-soft);
+    padding: 14px 16px 16px;
+    position: relative;
+  }
+  #root .entry.archived { opacity: 0.55; }
+  #root .entry.archived .task-text { text-decoration: line-through; text-decoration-color: var(--rule); }
+  #root .entry-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  #root .assigner {
+    font-family: var(--font-data);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  #root .task-text {
+    margin: 7px 0 0;
+    font-size: 15.5px;
+    line-height: 1.42;
+  }
+  #root .refs {
+    margin: 10px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  #root .ref-chip {
+    font-family: var(--font-data);
+    font-size: 11px;
+    padding: 3px 6px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: var(--paper);
+    color: var(--ink-soft);
+  }
+  #root .update-note {
+    margin: 11px 0 0;
+    padding: 9px 11px;
+    background: var(--paper);
+    border-left: 3px solid var(--done);
+    font-size: 14px;
+  }
+  #root .update-note strong {
+    font-family: var(--font-data);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    display: block;
+    margin-bottom: 3px;
+    font-weight: 600;
+  }
+
+  /* ---------- signature: rubber stamp ---------- */
+  #root .stamp {
+    font-family: var(--font-data);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 5px 8px 4px;
+    border: 1.5px solid currentColor;
+    border-radius: 3px;
+    transform: rotate(-3.5deg);
+    flex-shrink: 0;
+    background: transparent;
+    cursor: pointer;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.75);
+    opacity: 0.88;
+    white-space: nowrap;
+  }
+  #root .stamp.pending { color: var(--stamp); }
+  #root .stamp.progress { color: var(--progress); transform: rotate(-1.5deg); }
+  #root .stamp.completed { color: var(--done); transform: rotate(2deg); }
+
+  /* ---------- entry actions ---------- */
+  #root .entry-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  #root .mini-btn {
+    font-family: var(--font-data);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 8px;
+    border: 1px solid var(--rule);
+    background: transparent;
+    color: var(--ink-soft);
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  #root .mini-btn:hover { border-color: var(--ink); color: var(--ink); }
+  #root .mini-btn.danger:hover { border-color: var(--stamp); color: var(--stamp); }
+
+  /* ---------- forms / panels ---------- */
+  #root .panel {
+    background: var(--sheet);
+    border: 1px solid var(--ink);
+    margin: 14px 16px;
+    padding: 14px;
+  }
+  #root .panel h3 {
+    font-family: var(--font-data);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin: 0 0 12px;
+    color: var(--ink-soft);
+  }
+  #root .field { margin-bottom: 10px; }
+  #root .field label {
+    display: block;
+    font-family: var(--font-data);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+  #root .field input,
+  #root .field textarea,
+  #root .field select {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 8px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  #root .field textarea { min-height: 66px; resize: vertical; font-family: var(--font-body); }
+  #root .field input.mono, #root .field textarea.mono { font-family: var(--font-data); font-size: 13px; }
+  #root .field-row { display: flex; gap: 10px; }
+  #root .field-row .field { flex: 1; }
+  #root .panel-actions { display: flex; gap: 8px; margin-top: 4px; }
+
+  #root .empty {
+    padding: 44px 20px;
+    text-align: center;
+    color: var(--ink-soft);
+  }
+  #root .empty p { margin: 0 0 4px; }
+  #root .empty .empty-lead {
+    font-family: var(--font-data);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  #root .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 20px;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--sheet);
+    font-family: var(--font-data);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 9px 14px;
+    border-radius: 2px;
+    z-index: 90;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  #root .toast.show { opacity: 1; }
+
+  #root button:focus-visible,
+  #root input:focus-visible,
+  #root select:focus-visible,
+  #root textarea:focus-visible {
+    outline: 2px solid var(--progress);
+    outline-offset: 2px;
+  }
+  #root .hidden { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    #root * { transition: none !important; }
+    #root .stamp { transform: none; }
+  }
+  @media (min-width: 620px) {
+    #root .entry { padding: 16px 24px 18px; }
+    #root .date-band { padding: 22px 24px 7px; }
+    #root .masthead, #root .controls { padding-left: 24px; padding-right: 24px; }
+    #root .panel { margin-left: 24px; margin-right: 24px; }
+  }
+</style>
+
+<div class="masthead">
+  <p class="masthead-eyebrow">Procurement &amp; Commercial · TTIPL</p>
+  <h1 class="masthead-title">Daily Task Register</h1>
+  <p class="masthead-meta">
+    <span id="metaCount">—</span>
+    <span id="metaSaved">Saving locally</span>
+  </p>
+</div>
+
+<div class="controls">
+  <div class="filters" id="filters">
+    <button class="filter-btn" data-filter="all" aria-pressed="true">All <span class="filter-count" data-count="all"></span></button>
+    <button class="filter-btn" data-filter="Pending" aria-pressed="false">Pending <span class="filter-count" data-count="Pending"></span></button>
+    <button class="filter-btn" data-filter="In Progress" aria-pressed="false">In Progress <span class="filter-count" data-count="In Progress"></span></button>
+    <button class="filter-btn" data-filter="Completed" aria-pressed="false">Completed <span class="filter-count" data-count="Completed"></span></button>
+    <button class="filter-btn" data-filter="archived" aria-pressed="false">Archive <span class="filter-count" data-count="archived"></span></button>
+  </div>
+  <div class="search-row">
+    <input class="search-input" id="search" type="search" placeholder="Search task, person, PR/PO/WO…" aria-label="Search tasks">
+    <button class="icon-btn" id="btnAdd">Add task</button>
+  </div>
+  <div class="search-row">
+    <button class="icon-btn ghost" id="btnImport">Import from Claude</button>
+    <button class="icon-btn ghost" id="btnExport">Export CSV</button>
+    <button class="icon-btn ghost" id="btnCopy">Copy as text</button>
+    <button class="icon-btn ghost" id="btnBackup">Save backup file</button>
+    <button class="icon-btn ghost" id="btnUndo">Undo last change</button>
+  </div>
+  <div class="search-row" id="linkRow">
+    <button class="icon-btn" id="btnSheet">Connect Google Sheet</button>
+    <button class="icon-btn ghost" id="btnLink">Link diary file</button>
+  </div>
+  <div class="search-row" style="gap:14px;flex-wrap:wrap">
+    <span id="syncStatus" style="font-family:var(--font-data);font-size:11px;color:var(--ink-soft);line-height:1.3"></span>
+    <span id="linkStatus" style="font-family:var(--font-data);font-size:11px;color:var(--ink-soft);line-height:1.3"></span>
+  </div>
+</div>
+
+<div class="panel hidden" id="addPanel">
+  <h3 id="addPanelTitle">New entry</h3>
+  <input type="hidden" id="fId">
+  <div class="field-row">
+    <div class="field">
+      <label for="fDate">Date received</label>
+      <input type="date" id="fDate" class="mono">
+    </div>
+    <div class="field">
+      <label for="fStatus">Status</label>
+      <select id="fStatus">
+        <option>Pending</option>
+        <option>In Progress</option>
+        <option>Completed</option>
+      </select>
+    </div>
+  </div>
+  <div class="field">
+    <label for="fBy">Assigned by</label>
+    <input type="text" id="fBy" placeholder="e.g. Ramesh Sir">
+  </div>
+  <div class="field">
+    <label for="fTask">Task / requirement</label>
+    <textarea id="fTask" placeholder="Exactly what was asked"></textarea>
+  </div>
+  <div class="field">
+    <label for="fRefs">Reference / PR · PO · WO · item · site</label>
+    <textarea id="fRefs" class="mono" placeholder="Comma separated"></textarea>
+  </div>
+  <div class="field">
+    <label for="fUpdate">Completion / update</label>
+    <textarea id="fUpdate" placeholder="What you actually did — leave blank until done"></textarea>
+  </div>
+  <div class="panel-actions">
+    <button class="icon-btn" id="btnSave">Save entry</button>
+    <button class="icon-btn ghost" id="btnCancel">Cancel</button>
+  </div>
+</div>
+
+<div class="panel hidden" id="importPanel">
+  <h3>Paste the block Claude gives you</h3>
+  <div class="field">
+    <textarea id="importBox" class="mono" style="min-height:130px" placeholder='[{"id":"…","date":"2026-08-25", …}]'></textarea>
+  </div>
+  <div class="panel-actions">
+    <button class="icon-btn" id="btnRunImport">Import entries</button>
+    <button class="icon-btn ghost" id="btnCloseImport">Cancel</button>
+  </div>
+</div>
+
+<div class="ledger" id="ledger"></div>
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+(function () {
+  // Works inside Claude (window.storage) and as a standalone file (localStorage).
+  const store = (typeof window !== 'undefined' && window.storage) ? window.storage : {
+    get: async (k) => {
+      const v = localStorage.getItem(k);
+      if (v === null) throw new Error('not found');
+      return { key: k, value: v };
+    },
+    set: async (k, v) => { localStorage.setItem(k, v); return { key: k, value: v }; },
+    delete: async (k) => { localStorage.removeItem(k); return { key: k, deleted: true }; },
+    list: async (p) => ({ keys: Object.keys(localStorage).filter(k => !p || k.startsWith(p)) })
+  };
+
+  const KEY = 'tracker:entries';
+  const KEY_PREV = 'tracker:entries:previous';
+  const KEY_MIRROR = 'tracker:entries:mirror';
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const SEED = [
+    {
+      id: 't-20260824-01',
+      date: '2026-08-24',
+      assignedBy: 'Ramesh Sir',
+      task: 'Remove the linked PRs and delete them completely.',
+      refs: ['PR/HYD/BAP/0805','PR/HYD/BAP/0788','PR/HYD/BAP/0787','PR/HYD/BAP/0786','PR/HYD/BAP/0785','PR/HYD/BAP/0784','PR/HYD/BAP/0783','PR/HYD/BAP/0782','PR/HYD/BAP/0781','PR/HYD/BAP/0780','PR/HYD/BAP/0779','PR/HYD/BAP/0778','PR/HYD/BAP/0777'],
+      status: 'Pending',
+      update: ''
+    },
+    {
+      id: 't-20260824-02',
+      date: '2026-08-24',
+      assignedBy: 'Kurmeih Sir',
+      task: 'Two PRs were merged and the quantity changed from 4,500 to 6,000. Revert the PR merging and correct the quantity.',
+      refs: [],
+      status: 'Completed',
+      update: 'Merging was reverted and the quantity was corrected.'
+    }
+  ];
+
+  let entries = [];
+  let filter = 'all';
+  let query = '';
+  let fileHandle = null;
+
+  // ---------- Google Sheet sync ----------
+  const KEY_URL = 'tracker:syncUrl';
+  let syncUrl = null, syncing = false, syncTimer = null;
+
+  function setSyncStatus(msg) { const el = $('syncStatus'); if (el) el.textContent = msg; }
+
+  async function loadSyncUrl() {
+    try { const r = await store.get(KEY_URL); syncUrl = (r && r.value) ? r.value : null; }
+    catch (e) { syncUrl = null; }
+    setSyncStatus(syncUrl ? 'Sheet connected' : 'No sheet connected - this browser only');
+    if (syncUrl) $('btnSheet').textContent = 'Sheet settings';
+  }
+
+  async function connectSheet() {
+    const url = prompt('Paste your Google Apps Script Web App URL (it ends with /exec).\n\nLeave it blank and press OK to disconnect.', syncUrl || '');
+    if (url === null) return;
+    const clean = url.trim();
+    if (clean && !/^https:\/\/script\.google\.com\/.+\/exec$/.test(clean)) {
+      toast('That does not look like a /exec URL');
+      return;
+    }
+    syncUrl = clean || null;
+    try { await store.set(KEY_URL, clean); } catch (e) {}
+    $('btnSheet').textContent = syncUrl ? 'Sheet settings' : 'Connect Google Sheet';
+    if (syncUrl) await syncNow(true);
+    else setSyncStatus('Disconnected - this browser only');
+  }
+
+  async function syncNow(loud) {
+    if (!syncUrl || syncing) return;
+    syncing = true;
+    setSyncStatus('Syncing...');
+    try {
+      const res = await fetch(syncUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'sync', entries: entries })
+      });
+      const data = await res.json();
+      if (!data || !Array.isArray(data.entries)) throw new Error('unexpected response');
+      entries = data.entries;
+      try {
+        await store.set(KEY, JSON.stringify(entries));
+        await store.set(KEY_MIRROR, JSON.stringify(entries));
+      } catch (e) {}
+      await writeDiaryFile();
+      setSyncStatus('Synced ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      render();
+      if (loud) toast('Sheet connected - ' + entries.length + ' entries');
+    } catch (err) {
+      setSyncStatus('Sync failed - saved here, will retry');
+      if (loud) toast('Could not reach the sheet');
+    } finally {
+      syncing = false;
+    }
+  }
+
+  function scheduleSync() {
+    if (!syncUrl) return;
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(function () { syncNow(false); }, 900);
+  }
+
+  // ---------- diary file (File System Access API) ----------
+  const CAN_LINK = typeof window !== 'undefined' && 'showSaveFilePicker' in window;
+
+  function idb(mode, fn) {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('diary-handle', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('kv');
+      r.onsuccess = () => {
+        const db = r.result;
+        const t = db.transaction('kv', mode);
+        const q = fn(t.objectStore('kv'));
+        t.oncomplete = () => res(q ? q.result : undefined);
+        t.onerror = () => rej(t.error);
+      };
+      r.onerror = () => rej(r.error);
+    });
+  }
+
+  function stamp(e) { e.updatedAt = new Date().toISOString(); return e; }
+
+  function mergeById(a, b) {
+    const map = new Map();
+    [].concat(a || [], b || []).forEach(e => {
+      if (!e || !e.id) return;
+      const prev = map.get(e.id);
+      if (!prev) { map.set(e.id, e); return; }
+      const pt = prev.updatedAt || '', et = e.updatedAt || '';
+      map.set(e.id, et >= pt ? e : prev);
+    });
+    return Array.from(map.values());
+  }
+
+  async function writeDiaryFile() {
+    if (!fileHandle) return;
+    try {
+      const w = await fileHandle.createWritable();
+      await w.write(JSON.stringify(entries, null, 2));
+      await w.close();
+      setLinkStatus('Saved to ' + fileHandle.name);
+    } catch (err) {
+      setLinkStatus('Could not write to the diary file');
+    }
+  }
+
+  async function readDiaryFile() {
+    if (!fileHandle) return null;
+    try {
+      const f = await fileHandle.getFile();
+      const text = await f.text();
+      const parsed = text.trim() ? JSON.parse(text) : null;
+      return Array.isArray(parsed) ? parsed : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function setLinkStatus(msg) {
+    const el = $('linkStatus');
+    if (el) el.textContent = msg;
+  }
+
+  async function linkFile() {
+    if (!CAN_LINK) {
+      toast('This browser cannot link a file — use Save backup file');
+      return;
+    }
+    try {
+      fileHandle = await window.showSaveFilePicker({
+        suggestedName: 'work-diary.json',
+        types: [{ description: 'Work diary', accept: { 'application/json': ['.json'] } }]
+      });
+      await idb('readwrite', s => s.put(fileHandle, 'handle'));
+      const fromFile = await readDiaryFile();
+      if (fromFile && fromFile.length) {
+        entries = mergeById(entries, fromFile);
+        toast('Diary file linked and merged');
+      } else {
+        toast('Diary file linked');
+      }
+      await save();
+      render();
+    } catch (err) {
+      // user cancelled the picker
+    }
+  }
+
+  async function restoreHandle() {
+    if (!CAN_LINK) {
+      setLinkStatus('This browser cannot link a file — take backups instead');
+      $('btnLink').style.display = 'none';
+      return null;
+    }
+    let h;
+    try { h = await idb('readonly', s => s.get('handle')); } catch (e) { h = null; }
+    if (!h) { setLinkStatus('Not linked — entries save in this browser only'); return null; }
+    let perm = await h.queryPermission({ mode: 'readwrite' });
+    if (perm !== 'granted') perm = await h.requestPermission({ mode: 'readwrite' });
+    if (perm !== 'granted') {
+      setLinkStatus('Permission needed — click Link diary file');
+      return null;
+    }
+    fileHandle = h;
+    $('btnLink').textContent = 'Change diary file';
+    setLinkStatus('Linked to ' + h.name);
+    return h;
+  }
+
+  const $ = (id) => document.getElementById(id);
+  const ledger = $('ledger');
+
+  function toast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._t);
+    t._t = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  function fmtDate(iso) {
+    const p = String(iso).split('-');
+    if (p.length !== 3) return iso;
+    return p[2] + '-' + (MONTHS[parseInt(p[1], 10) - 1] || p[1]) + '-' + p[0];
+  }
+  function weekday(iso) {
+    const d = new Date(iso + 'T00:00:00');
+    return isNaN(d) ? '' : d.toLocaleDateString(undefined, { weekday: 'long' });
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+  function stampClass(s) {
+    return s === 'Completed' ? 'completed' : s === 'In Progress' ? 'progress' : 'pending';
+  }
+  function nextStatus(s) {
+    return s === 'Pending' ? 'In Progress' : s === 'In Progress' ? 'Completed' : 'Pending';
+  }
+
+  async function readKey(k) {
+    try {
+      const res = await store.get(k);
+      const parsed = res && res.value ? JSON.parse(res.value) : null;
+      return Array.isArray(parsed) && parsed.length ? parsed : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function load() {
+    // Three places to look before assuming the register is empty.
+    entries = await readKey(KEY);
+    let recovered = '';
+    if (!entries) { entries = await readKey(KEY_MIRROR); if (entries) recovered = 'mirror copy'; }
+    if (!entries) { entries = await readKey(KEY_PREV); if (entries) recovered = 'previous version'; }
+
+    // The linked file outranks all of them — it is the real diary.
+    await restoreHandle();
+    const fromFile = await readDiaryFile();
+    if (fromFile && fromFile.length) {
+      entries = mergeById(entries || [], fromFile);
+      recovered = '';
+    }
+
+    if (!entries) {
+      entries = SEED.slice();
+      await save(true);
+    } else {
+      await save(true);
+      if (recovered) toast('Recovered from ' + recovered);
+    }
+    render();
+    await loadSyncUrl();
+    if (syncUrl) syncNow(false);
+  }
+
+  async function save(quiet) {
+    const payload = JSON.stringify(entries);
+    try {
+      // Keep the version we are about to replace, so a bad change is reversible.
+      const current = await store.get(KEY).catch(() => null);
+      if (current && current.value && current.value !== payload) {
+        await store.set(KEY_PREV, current.value);
+      }
+      await store.set(KEY, payload);
+      await store.set(KEY_MIRROR, payload);
+      $('metaSaved').textContent = 'Saved ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      $('metaSaved').textContent = 'Not saved — use Save backup file now';
+      if (!quiet) toast('Save failed — download a backup');
+    }
+    await writeDiaryFile();
+    scheduleSync();
+  }
+
+  function visible() {
+    return entries.filter(e => {
+      if (filter === 'archived') { if (!e.archived) return false; }
+      else if (e.archived) return false;
+      else if (filter !== 'all' && e.status !== filter) return false;
+      if (!query) return true;
+      const hay = [e.task, e.assignedBy, e.update, (e.refs || []).join(' '), fmtDate(e.date)].join(' ').toLowerCase();
+      return hay.includes(query);
+    });
+  }
+
+  function render() {
+    const counts = { all: 0, 'Pending': 0, 'In Progress': 0, 'Completed': 0, archived: 0 };
+    entries.forEach(e => {
+      if (e.archived) { counts.archived++; return; }
+      counts.all++;
+      if (counts[e.status] != null) counts[e.status]++;
+    });
+    document.querySelectorAll('#root .filter-count').forEach(el => {
+      el.textContent = counts[el.dataset.count] ?? 0;
+    });
+    $('metaCount').textContent = entries.length + ' entries · ' + counts['Pending'] + ' pending';
+
+    const list = visible();
+    if (!list.length) {
+      ledger.innerHTML = '<div class="empty"><p class="empty-lead">' +
+        (entries.length ? 'Nothing matches' : 'Register is empty') + '</p><p>' +
+        (entries.length ? 'Clear the search or pick another status.' : 'Add the first task, or send Claude a screenshot and import the entry.') +
+        '</p></div>';
+      return;
+    }
+
+    const byDate = {};
+    list.forEach(e => { (byDate[e.date] = byDate[e.date] || []).push(e); });
+    const dates = Object.keys(byDate).sort().reverse();
+
+    ledger.innerHTML = dates.map(d => {
+      const rows = byDate[d].map(e => {
+        const refs = (e.refs && e.refs.length)
+          ? '<div class="refs">' + e.refs.map(r => '<span class="ref-chip">' + esc(r) + '</span>').join('') + '</div>'
+          : '';
+        const upd = e.update
+          ? '<div class="update-note"><strong>Update</strong>' + esc(e.update) + '</div>'
+          : '';
+        return '<article class="entry' + (e.archived ? ' archived' : '') + '" data-id="' + esc(e.id) + '">' +
+          '<div class="entry-head">' +
+            '<div style="min-width:0"><p class="assigner">' + esc(e.assignedBy || 'Not recorded') + '</p>' +
+            '<p class="task-text">' + esc(e.task) + '</p></div>' +
+            '<button class="stamp ' + stampClass(e.status) + '" data-act="cycle" title="Tap to change status">' + esc(e.status) + '</button>' +
+          '</div>' + refs + upd +
+          '<div class="entry-actions">' +
+            '<button class="mini-btn" data-act="edit">Edit</button>' +
+            '<button class="mini-btn" data-act="note">Add update</button>' +
+            (e.archived
+              ? '<button class="mini-btn" data-act="restore">Restore</button>'
+              : '<button class="mini-btn" data-act="archive">Archive</button>') +
+          '</div></article>';
+      }).join('');
+      return '<div class="date-band"><h2>' + fmtDate(d) + '</h2><span>' + weekday(d) + ' · ' + byDate[d].length + '</span></div>' + rows;
+    }).join('');
+  }
+
+  // ---------- entry actions ----------
+  ledger.addEventListener('click', async (ev) => {
+    const btn = ev.target.closest('[data-act]');
+    if (!btn) return;
+    const id = btn.closest('.entry').dataset.id;
+    const e = entries.find(x => x.id === id);
+    if (!e) return;
+    const act = btn.dataset.act;
+
+    if (act === 'cycle') {
+      e.status = nextStatus(e.status);
+      stamp(e);
+      await save();
+      render();
+      toast('Status: ' + e.status);
+    } else if (act === 'archive') {
+      e.archived = true;
+      stamp(e);
+      await save();
+      render();
+      toast('Moved to Archive');
+    } else if (act === 'restore') {
+      e.archived = false;
+      stamp(e);
+      await save();
+      render();
+      toast('Restored to the register');
+    } else if (act === 'note') {
+      const note = prompt('What did you do? This is recorded as the update.', e.update || '');
+      if (note === null) return;
+      e.update = note.trim();
+      stamp(e);
+      await save();
+      render();
+      toast('Update recorded');
+    } else if (act === 'edit') {
+      openForm(e);
+    }
+  });
+
+  // ---------- form ----------
+  function openForm(e) {
+    $('addPanelTitle').textContent = e ? 'Edit entry' : 'New entry';
+    $('fId').value = e ? e.id : '';
+    $('fDate').value = e ? e.date : new Date().toISOString().slice(0, 10);
+    $('fBy').value = e ? e.assignedBy : '';
+    $('fTask').value = e ? e.task : '';
+    $('fRefs').value = e ? (e.refs || []).join(', ') : '';
+    $('fStatus').value = e ? e.status : 'Pending';
+    $('fUpdate').value = e ? (e.update || '') : '';
+    $('addPanel').classList.remove('hidden');
+    $('importPanel').classList.add('hidden');
+    $('fTask').focus();
+  }
+
+  $('btnAdd').addEventListener('click', () => openForm(null));
+  $('btnCancel').addEventListener('click', () => $('addPanel').classList.add('hidden'));
+
+  $('btnSave').addEventListener('click', async () => {
+    const task = $('fTask').value.trim();
+    if (!task) { toast('Task cannot be empty'); $('fTask').focus(); return; }
+    const refs = $('fRefs').value.split(',').map(s => s.trim()).filter(Boolean);
+    const id = $('fId').value;
+    const payload = {
+      date: $('fDate').value || new Date().toISOString().slice(0, 10),
+      assignedBy: $('fBy').value.trim(),
+      task: task,
+      refs: refs,
+      status: $('fStatus').value,
+      update: $('fUpdate').value.trim()
+    };
+    if (id) {
+      stamp(Object.assign(entries.find(x => x.id === id), payload));
+    } else {
+      payload.id = 't-' + payload.date.replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 6);
+      entries.push(stamp(payload));
+    }
+    await save();
+    $('addPanel').classList.add('hidden');
+    render();
+    toast(id ? 'Entry updated' : 'Entry added');
+  });
+
+  // ---------- import ----------
+  $('btnImport').addEventListener('click', () => {
+    $('importPanel').classList.remove('hidden');
+    $('addPanel').classList.add('hidden');
+    $('importBox').focus();
+  });
+  $('btnCloseImport').addEventListener('click', () => $('importPanel').classList.add('hidden'));
+
+  $('btnRunImport').addEventListener('click', async () => {
+    let raw = $('importBox').value.trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+    let incoming;
+    try {
+      incoming = JSON.parse(raw);
+    } catch (err) {
+      toast('That is not valid JSON');
+      return;
+    }
+    if (!Array.isArray(incoming)) incoming = [incoming];
+    let added = 0, updated = 0;
+    incoming.forEach(item => {
+      if (!item || !item.task) return;
+      const clean = {
+        id: item.id || ('t-' + String(item.date || '').replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 6)),
+        date: item.date || new Date().toISOString().slice(0, 10),
+        assignedBy: item.assignedBy || '',
+        task: item.task,
+        refs: Array.isArray(item.refs) ? item.refs : (item.refs ? String(item.refs).split(',').map(s => s.trim()).filter(Boolean) : []),
+        status: ['Pending','In Progress','Completed'].includes(item.status) ? item.status : 'Pending',
+        update: item.update || ''
+      };
+      const existing = entries.find(x => x.id === clean.id);
+      if (existing) { stamp(Object.assign(existing, clean)); updated++; }
+      else { entries.push(stamp(clean)); added++; }
+    });
+    await save();
+    $('importBox').value = '';
+    $('importPanel').classList.add('hidden');
+    render();
+    toast(added + ' added · ' + updated + ' updated');
+  });
+
+  // ---------- export ----------
+  function csvCell(v) {
+    const s = String(v == null ? '' : v);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  $('btnExport').addEventListener('click', () => {
+    const sorted = entries.slice().sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
+    const head = ['Date','Assigned By','Task / Requirement','Reference / PR Numbers','Status','Completion / Update'];
+    const rows = sorted.map(e => [fmtDate(e.date), e.assignedBy, e.task, (e.refs || []).join(' | '), e.status, e.update].map(csvCell).join(','));
+    const csv = '\uFEFF' + head.join(',') + '\n' + rows.join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'task-register.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('CSV downloaded');
+  });
+
+  $('btnCopy').addEventListener('click', async () => {
+    const list = visible();
+    const byDate = {};
+    list.forEach(e => { (byDate[e.date] = byDate[e.date] || []).push(e); });
+    const text = Object.keys(byDate).sort().reverse().map(d =>
+      fmtDate(d) + '\n' + byDate[d].map(e =>
+        '- [' + e.status + '] ' + (e.assignedBy ? e.assignedBy + ' — ' : '') + e.task +
+        ((e.refs && e.refs.length) ? '\n  Ref: ' + e.refs.join(', ') : '') +
+        (e.update ? '\n  Update: ' + e.update : '')
+      ).join('\n')
+    ).join('\n\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('Copied to clipboard');
+    } catch (err) {
+      toast('Copy blocked — use Export CSV');
+    }
+  });
+
+  // ---------- backup & undo ----------
+  $('btnBackup').addEventListener('click', () => {
+    const url = URL.createObjectURL(new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'task-register-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('Backup saved — paste it into Import to restore');
+  });
+
+  $('btnUndo').addEventListener('click', async () => {
+    const prev = await readKey(KEY_PREV);
+    if (!prev) { toast('No earlier version stored'); return; }
+    if (!confirm('Go back to the version before your last change? Nothing is deleted — the current version becomes the undo point.')) return;
+    const current = JSON.stringify(entries);
+    entries = prev;
+    try {
+      await store.set(KEY, JSON.stringify(entries));
+      await store.set(KEY_MIRROR, JSON.stringify(entries));
+      await store.set(KEY_PREV, current);
+    } catch (err) {
+      toast('Undo could not be saved');
+    }
+    render();
+    toast('Reverted to the earlier version');
+  });
+
+  $('btnLink').addEventListener('click', linkFile);
+  $('btnSheet').addEventListener('click', connectSheet);
+
+  // ---------- filters & search ----------
+  $('filters').addEventListener('click', (ev) => {
+    const b = ev.target.closest('.filter-btn');
+    if (!b) return;
+    filter = b.dataset.filter;
+    document.querySelectorAll('#root .filter-btn').forEach(x =>
+      x.setAttribute('aria-pressed', String(x === b)));
+    render();
+  });
+  $('search').addEventListener('input', (ev) => {
+    query = ev.target.value.trim().toLowerCase();
+    render();
+  });
+
+  load();
+})();
+</script>
