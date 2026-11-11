@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Qev6KpmylsQRPZhnNpYE6mfCrVOsbmLKaxMIjvP38tU='; style-src 'sha256-ZR29La4IZK21VFgeNZg5kfEsfMd7wT4Es75UJ4np7Gs='; connect-src https://script.google.com https://script.googleusercontent.com; img-src data:; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
 <title>Daily Task Register</title>
 </head>
 <body>
@@ -330,6 +332,10 @@
     outline-offset: 2px;
   }
   #root .hidden { display: none; }
+  #root .entry-main { min-width: 0; }
+  #root .status-row { gap: 14px; flex-wrap: wrap; }
+  #root .status-text { font-family: var(--font-data); font-size: 11px; color: var(--ink-soft); line-height: 1.3; }
+  #root .field textarea.tall { min-height: 130px; }
 
   @media (prefers-reduced-motion: reduce) {
     #root * { transition: none !important; }
@@ -375,9 +381,9 @@
     <button class="icon-btn" id="btnSheet">Connect Google Sheet</button>
     <button class="icon-btn ghost" id="btnLink">Link diary file</button>
   </div>
-  <div class="search-row" style="gap:14px;flex-wrap:wrap">
-    <span id="syncStatus" style="font-family:var(--font-data);font-size:11px;color:var(--ink-soft);line-height:1.3"></span>
-    <span id="linkStatus" style="font-family:var(--font-data);font-size:11px;color:var(--ink-soft);line-height:1.3"></span>
+  <div class="search-row status-row">
+    <span id="syncStatus" class="status-text"></span>
+    <span id="linkStatus" class="status-text"></span>
   </div>
 </div>
 
@@ -423,7 +429,7 @@
 <div class="panel hidden" id="importPanel">
   <h3>Paste the block Claude gives you</h3>
   <div class="field">
-    <textarea id="importBox" class="mono" style="min-height:130px" placeholder='[{"id":"…","date":"2026-08-25", …}]'></textarea>
+    <textarea id="importBox" class="mono tall" placeholder='[{"id":"…","date":"2026-08-25", …}]'></textarea>
   </div>
   <div class="panel-actions">
     <button class="icon-btn" id="btnRunImport">Import entries</button>
@@ -474,6 +480,44 @@
     }
   ];
 
+  // ---------- input validation ----------
+  // Everything that enters the register (import, sync, diary file, stored copy)
+  // passes through here, so malformed or hostile data cannot reach the page.
+  const STATUSES = ['Pending', 'In Progress', 'Completed'];
+  const MAX_ENTRIES = 5000;
+  function str(v, max) { return (typeof v === 'string' ? v : (v == null || typeof v === 'object' ? '' : String(v))).slice(0, max); }
+  function cleanEntry(item) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return null;
+    const task = str(item.task, 5000).trim();
+    if (!task) return null;
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(item.date) ? item.date : new Date().toISOString().slice(0, 10);
+    let id = str(item.id, 64);
+    if (!/^[A-Za-z0-9_-]+$/.test(id)) id = 't-' + date.replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 8);
+    let refs = Array.isArray(item.refs) ? item.refs : (typeof item.refs === 'string' ? item.refs.split(',') : []);
+    refs = refs.map(r => str(r, 200).trim()).filter(Boolean).slice(0, 200);
+    const out = {
+      id: id,
+      date: date,
+      assignedBy: str(item.assignedBy, 200).trim(),
+      task: task,
+      refs: refs,
+      status: STATUSES.includes(item.status) ? item.status : 'Pending',
+      update: str(item.update, 5000).trim()
+    };
+    if (item.archived === true) out.archived = true;
+    if (typeof item.updatedAt === 'string' && !isNaN(Date.parse(item.updatedAt))) out.updatedAt = item.updatedAt;
+    return out;
+  }
+  function cleanList(list) {
+    if (!Array.isArray(list)) return null;
+    const seen = new Set(), out = [];
+    for (const item of list.slice(0, MAX_ENTRIES)) {
+      const c = cleanEntry(item);
+      if (c && !seen.has(c.id)) { seen.add(c.id); out.push(c); }
+    }
+    return out;
+  }
+
   let entries = [];
   let filter = 'all';
   let query = '';
@@ -496,7 +540,7 @@
     const url = prompt('Paste your Google Apps Script Web App URL (it ends with /exec).\n\nLeave it blank and press OK to disconnect.', syncUrl || '');
     if (url === null) return;
     const clean = url.trim();
-    if (clean && !/^https:\/\/script\.google\.com\/.+\/exec$/.test(clean)) {
+    if (clean && !/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(clean)) {
       toast('That does not look like a /exec URL');
       return;
     }
@@ -515,11 +559,16 @@
       const res = await fetch(syncUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        credentials: 'omit',
+        referrerPolicy: 'no-referrer',
         body: JSON.stringify({ action: 'sync', entries: entries })
       });
+      if (!res.ok) throw new Error('bad status');
       const data = await res.json();
-      if (!data || !Array.isArray(data.entries)) throw new Error('unexpected response');
-      entries = data.entries;
+      const incoming = data && cleanList(data.entries);
+      if (!incoming) throw new Error('unexpected response');
+      // Merge, never replace: a bad server reply can add or update entries but cannot wipe local data.
+      entries = mergeById(entries, incoming);
       try {
         await store.set(KEY, JSON.stringify(entries));
         await store.set(KEY_MIRROR, JSON.stringify(entries));
@@ -591,8 +640,9 @@
     try {
       const f = await fileHandle.getFile();
       const text = await f.text();
+      if (text.length > 20000000) return null;
       const parsed = text.trim() ? JSON.parse(text) : null;
-      return Array.isArray(parsed) ? parsed : null;
+      return cleanList(parsed);
     } catch (err) {
       return null;
     }
@@ -684,7 +734,8 @@
     try {
       const res = await store.get(k);
       const parsed = res && res.value ? JSON.parse(res.value) : null;
-      return Array.isArray(parsed) && parsed.length ? parsed : null;
+      const list = cleanList(parsed);
+      return list && list.length ? list : null;
     } catch (e) {
       return null;
     }
@@ -782,7 +833,7 @@
           : '';
         return '<article class="entry' + (e.archived ? ' archived' : '') + '" data-id="' + esc(e.id) + '">' +
           '<div class="entry-head">' +
-            '<div style="min-width:0"><p class="assigner">' + esc(e.assignedBy || 'Not recorded') + '</p>' +
+            '<div class="entry-main"><p class="assigner">' + esc(e.assignedBy || 'Not recorded') + '</p>' +
             '<p class="task-text">' + esc(e.task) + '</p></div>' +
             '<button class="stamp ' + stampClass(e.status) + '" data-act="cycle" title="Tap to change status">' + esc(e.status) + '</button>' +
           '</div>' + refs + upd +
@@ -900,17 +951,8 @@
     }
     if (!Array.isArray(incoming)) incoming = [incoming];
     let added = 0, updated = 0;
-    incoming.forEach(item => {
-      if (!item || !item.task) return;
-      const clean = {
-        id: item.id || ('t-' + String(item.date || '').replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 6)),
-        date: item.date || new Date().toISOString().slice(0, 10),
-        assignedBy: item.assignedBy || '',
-        task: item.task,
-        refs: Array.isArray(item.refs) ? item.refs : (item.refs ? String(item.refs).split(',').map(s => s.trim()).filter(Boolean) : []),
-        status: ['Pending','In Progress','Completed'].includes(item.status) ? item.status : 'Pending',
-        update: item.update || ''
-      };
+    (cleanList(incoming) || []).forEach(clean => {
+      delete clean.updatedAt;
       const existing = entries.find(x => x.id === clean.id);
       if (existing) { stamp(Object.assign(existing, clean)); updated++; }
       else { entries.push(stamp(clean)); added++; }
@@ -924,7 +966,9 @@
 
   // ---------- export ----------
   function csvCell(v) {
-    const s = String(v == null ? '' : v);
+    let s = String(v == null ? '' : v);
+    // Stop spreadsheet apps from running text such as =HYPERLINK(...) as a formula.
+    if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
     return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
   }
   $('btnExport').addEventListener('click', () => {
